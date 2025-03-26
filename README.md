@@ -13,7 +13,7 @@ expected by Yolo as documented :
 ```
 python3 -m venv venv
 source venv/bin/activate
-python -m pip install ultralytics pylabel
+python -m pip install ultralytics pylabel wandb
 ```
 
 ## Atlas dataset
@@ -82,6 +82,7 @@ ln -s $ORIGINAL_DATA_DIR/train/images data/images/train
 ln -s $ORIGINAL_DATA_DIR/val/images data/images/val
 ```
 
+
 As a sanity check, the following command will count the number of images for
 training and validation
 
@@ -104,3 +105,29 @@ It should take 10 minutes pour 40k annotations.
 
 
 ## Training
+
+To allow wandb logging, see the ultralytics doc
+[https://docs.ultralytics.com/integrations/weights-biases/#installation](https://docs.ultralytics.com/integrations/weights-biases/#installation)
+
+```
+yolo settings wandb=True
+wandb login YOUR_API_KEY
+```
+
+To train a yolov11n on the data : 
+
+```
+yolo detect train data=./data/data.yaml model=yolo11n.yaml project=atlas
+```
+
+# Troubleshoots
+
+## no labels found
+
+For some reasons, and this may be due to the fact that images added to the dataset with symbolic links, yolo may fail to
+locate the labels related to the images. When I was debugging this, I had the right directory structure but I believe
+yolo is computing the labels path using the real image path. 
+
+To solve this, instead of doing symlinks, I copied the image files and this solved the problem.
+
+
