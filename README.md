@@ -79,7 +79,7 @@ To convert the images layout, we just symlink to the original images :
 ```
 export ORIGINAL_DATA_DIR=/original/directory
 ln -s $ORIGINAL_DATA_DIR/train/images data/images/train
-ln -s $ORIGINAL_DATA_DIR/val/images data/images/valid
+ln -s $ORIGINAL_DATA_DIR/val/images data/images/val
 ```
 
 As a sanity check, the following command will count the number of images for
@@ -100,4 +100,7 @@ python tools/convert-voc-to-yolo.py $ORIGINAL_DATA_DIR/train/annotations data/la
 python tools/convert-voc-to-yolo.py $ORIGINAL_DATA_DIR/valid/annotations data/labels/val/ 
 ```
 
+It should take 10 minutes pour 40k annotations.
 
+
+## Training
