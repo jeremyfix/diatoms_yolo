@@ -8,8 +8,15 @@ expected by Yolo as documented :
 - [https://docs.ultralytics.com/datasets/obb/](https://docs.ultralytics.com/datasets/obb/) for oriented bounding boxes : class_index x1 y1 x2 y2 x3 y3 x4 y4 with normalized x, y (in [0, 1])
 - [https://docs.ultralytics.com/datasets/detect/#ultralytics-yolo-format](https://docs.ultralytics.com/datasets/detect/#ultralytics-yolo-format) for non oriented bounding boxes, (class_idx, x, y, width, height) with normalized x, y, width, height (in [0, 1])
 
-## Atlas dataset
+## Setup
 
+```
+python3 -m venv venv
+source venv/bin/activate
+python -m pip install ultralytics pylabel
+```
+
+## Atlas dataset
 ### Layout
 
 The atlas dataset is structured as 36K train images and 4K valid images with the
@@ -31,7 +38,7 @@ dataset101
 		images
 ```
 
-The annotation format is :
+The annotation format is the Pascal VOC format
 
 ```
 <annotation>
@@ -84,6 +91,13 @@ ls -l data/images/valid/ | wc -l
 ```
 
 For the **labels**, we need to translate the xml into (class_idx, x, y, width, heigh)
-coordinates, normalized by the image widths and heights.
+coordinates, normalized by the image widths and heights. For now, let us use
+[pylabel](https://github.com/pylabel-project/pylabel) but it should not be too
+difficult to write your own converter.
+
+```
+python tools/convert-voc-to-yolo.py $ORIGINAL_DATA_DIR/train/annotations data/labels/train/
+python tools/convert-voc-to-yolo.py $ORIGINAL_DATA_DIR/valid/annotations data/labels/val/ 
+```
 
 
