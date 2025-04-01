@@ -32,6 +32,9 @@ def draw_obb(image_path, label_path):
                 image, [points], isClosed=True, color=(0, 255, 0), thickness=2
             )
     plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    plt.tight_layout()
+    plt.axis("off")
+    plt.savefig("obb.png")
     plt.show()
 
 

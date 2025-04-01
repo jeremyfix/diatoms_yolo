@@ -16,6 +16,58 @@ source venv/bin/activate
 python -m pip install ultralytics pylabel wandb
 ```
 
+## Cleurie/Orne dataset
+
+### Layout
+
+The Cleurie/Orne data exported from Bigle has to be restructured and its
+annotations must be converted from COCO to yolo.
+
+As a first step, we convert the layout of the data into the following :
+
+```
+CleurieOrne
+	images
+		all
+			...
+			02085325_2020_img220616_065.JPG
+			...
+			02089000_2021_img_240513_006.JPG
+			...
+	labels
+		all
+			...
+			02085325_2020_img220616_065.txt
+			...
+			02089000_2021_img_240513_006.txt
+			...
+```
+
+You must first copy all the images, flat, in the images/all subdirectory. Then,
+for the labels, 
+
+```
+python3 tools/convert-coco-to-yolo.py /opt/Datasets/Diatoms/Bigle/annotations/ tmp/
+```
+
+This will create all the label files into `tmp/labels/...`. I then copied all
+the annotation files, flat, into the `CleurieOrne/labels/all`. The converter
+(which is coming from ultralytics) is creating one subdirectory by coco json
+file. You may not need to copy all the annotations, flat, in a single directory,
+I do not know.
+
+At this point, we want to visually check our images and annotations are ok. You
+can do so running the python script :
+
+```
+python3 tools/visualize_obb.py CleurieOrne
+```
+
+This will randomly pick one sample and plot the bounding boxes around the
+diatoms.
+
+![Example image with its oriented bounding boxes around the diatoms](https://github.com/jeremyfix/diatoms_yolo/blob/main/html/assets/obb.png)
+
 ## Atlas dataset
 ### Layout
 
@@ -118,6 +170,14 @@ To train a yolov11n on the data :
 
 ```
 yolo detect train data=./data/data.yaml model=yolo11n.yaml project=atlas
+```
+
+## Inference
+
+To test the predictions on an image, 
+
+```
+yolo detect predict model=best.pt source=/path/to/image
 ```
 
 # Troubleshoots
