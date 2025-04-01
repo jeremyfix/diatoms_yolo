@@ -66,7 +66,7 @@ python3 tools/visualize_obb.py CleurieOrne
 This will randomly pick one sample and plot the bounding boxes around the
 diatoms.
 
-![Example image with its oriented bounding boxes around the diatoms](https://github.com/jeremyfix/diatoms_yolo/blob/main/html/assets/obb.png)
+![Example image with its oriented bounding boxes around the diatoms](https://github.com/jeremyfix/diatoms_yolo/blob/main/assets/obb.png)
 
 ## Atlas dataset
 ### Layout
