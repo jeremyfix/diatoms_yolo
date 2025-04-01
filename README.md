@@ -68,6 +68,69 @@ diatoms.
 
 ![Example image with its oriented bounding boxes around the diatoms](https://github.com/jeremyfix/diatoms_yolo/blob/main/assets/obb.png)
 
+Then we need to split the data and create the `data.yaml` file containing the
+informations about the data.
+
+For the split :
+
+```
+cd CleurieOrne
+
+# Create the train/val dir layout
+for d in images labels; do for dd in train val; do mkdir -p $d/$dd; done; done
+
+# Optional : unlink previously generated split
+for d in images labels ; do for dd in train val; do $(for f in $d/$dd/*; do unlink $f) | true; done; done; done
+
+# Generate the train/val split (80/20)
+find images/all -type f | shuf > diatom_list
+split -l $[ $(wc -l diatom_list |cut -d" " -f1) * 80 / 100  ] diatom_list fold_
+mv fold_aa fold_train
+mv fold_ab fold_val
+
+# Now we produce the symlinks to the images and annotations for both folds
+for fold in train val; do \
+cd images/$fold ; \
+for f in $(cat ../../fold_$fold); do  ln -s ../../$f ; done ; \
+cd ../../; done 
+
+# Do the same for the labels, we just iterate on the image list
+# and substitute images/labels JPG/txt
+for fold in train val; do \
+cd labels/$fold ; \
+for f in $(cat ../../fold_$fold); do ln -s ../../$(echo $f | sed 's/^images/labels/' | sed 's/JPG$/txt/' ); done
+cd ../../; done 
+```
+
+and finally the `data.yaml` file should contain the expected elements, to be
+adapted :
+
+
+**data.yaml**
+```
+path: /base_dir/where/data/lives/CleurieOrne
+train: images/train/
+val: images/val/
+test:
+
+# Directories
+train_label_dir: labels/train/
+val_label_dir: labels/val/
+
+names:
+  0: diatom
+
+```
+
+## Training 
+
+For training, we use the obb checkpoints and task :
+
+```
+yolo obb train data=CleurieOrne/data.yaml model=yolo11n-obb.yaml project=CleurieOrne
+```
+
+
 ## Atlas dataset
 ### Layout
 
