@@ -108,6 +108,7 @@ import pathlib
 import json
 import cv2
 import numpy as np
+import tqdm
 
 
 def process_annotation_file(
@@ -135,7 +136,7 @@ def process_annotation_file(
         os.makedirs(os.path.join(output_dir, cat), exist_ok=True)
 
     # Process each annotation
-    for ann in data["annotations"]:
+    for ann in tqdm.tqdm(data["annotations"]):
         image_id = ann["image_id"]
         category_id = ann["category_id"]
         segmentation = ann["segmentation"][0]
@@ -165,12 +166,25 @@ def process_annotation_file(
         # cv2.waitKey(0)
 
         M = cv2.getRotationMatrix2D((xc, yc), angle - 90, 1)
-        rotated = cv2.warpAffine(img, M, img.shape[1::-1], flags=cv2.INTER_CUBIC)
+        rotated = cv2.warpAffine(
+            img,
+            M,
+            img.shape[1::-1],
+            flags=cv2.INTER_CUBIC,
+            borderMode=cv2.BORDER_REPLICATE,
+        )
 
         # cv2.imshow("Image", rotated)
         # cv2.waitKey(0)
 
         cropped = cv2.getRectSubPix(rotated, (height, width), (xc, yc))
+        if height < width:
+            # Transpose
+            cropped = np.transpose(cropped, (1, 0, 2))
+
+        if cropped is None or cropped.size == (0, 0):
+            print(f"Error: Cropped image is empty for {file_name} with id {ann['id']}")
+            continue
 
         # cv2.imshow("Cropped Image", cropped)
         # cv2.waitKey(0)
@@ -198,5 +212,6 @@ if __name__ == "__main__":
     json_files = glob.glob(annotation_dir + "/*.json")
 
     # Process each json file
-    for json_file in json_files:
+    for i, json_file in enumerate(json_files):
+        print(f"Processing {i + 1}/{len(json_files)}: {json_file}"
         process_annotation_file(json_file, base_image_dir, output_dir)
