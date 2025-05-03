@@ -112,7 +112,7 @@ import tqdm
 
 
 def process_annotation_file(
-    annotation_file, base_image_dir: pathlib.Path, output_dir: pathlib.Path
+    annotation_file, base_image_dir: pathlib.Path, output_dir: pathlib.Path, img_size: int
 ):
     """
     Process a single annotation file and save the cropped images in the output directory.
@@ -186,6 +186,22 @@ def process_annotation_file(
             print(f"Error: Cropped image is empty for {file_name} with id {ann['id']}")
             continue
 
+        # We now handle the size of the image
+        # If the longest size to img_size
+        height, width = cropped.shape[:2]
+        if width > img_size:
+            cropped = cropped[:, width // 2 - img_size // 2 : width // 2 + img_size // 2]
+        height, width = cropped.shape[:2]
+
+        # Square pad the image to be img_size x img_size
+        target_img = np.zeros((img_size, img_size, 3), dtype=np.uint8)
+        mean_color = cropped.mean()
+        target_img[:, :] = mean_color  # Fill with mean color
+        x_offset = (img_size - width) // 2
+        y_offset = (img_size - height) // 2
+        target_img[y_offset : y_offset + height, x_offset : x_offset + width] = cropped
+
+
         # cv2.imshow("Cropped Image", cropped)
         # cv2.waitKey(0)
 
@@ -193,25 +209,26 @@ def process_annotation_file(
         category_name = category_dict[category_id]
         output_path = output_dir / category_name / f"{file_name}_{ann['id']}.jpg"
 
-        cv2.imwrite(str(output_path), cropped)
+        cv2.imwrite(str(output_path), target_img)
 
 
 if __name__ == "__main__":
 
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 5:
         print(
-            "Usage: python build-classification-dataset-from-coco.py annotation_dir base_image_dir output_dir"
+            "Usage: python build-classification-dataset-from-coco.py annotation_dir base_image_dir output_dir img_size"
         )
         sys.exit(1)
 
     annotation_dir = sys.argv[1]
     base_image_dir = pathlib.Path(sys.argv[2])
     output_dir = pathlib.Path(sys.argv[3])
+    img_size = int(sys.argv[4])
 
     # List all the json files in the annotation_dir
     json_files = glob.glob(annotation_dir + "/*.json")
 
     # Process each json file
     for i, json_file in enumerate(json_files):
-        print(f"Processing {i + 1}/{len(json_files)}: {json_file}"
-        process_annotation_file(json_file, base_image_dir, output_dir)
+        print(f"Processing {i + 1}/{len(json_files)}: {json_file}")
+        process_annotation_file(json_file, base_image_dir, output_dir, img_size)
