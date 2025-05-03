@@ -22,6 +22,18 @@ We should :
   break the aspect ratio
 
 
+## Atlas v1
+
+We have $34 343$ images. We have to exclude $82$ taxons as defined in `taxon_to_exclude.csv`.
+
+### By genus
+
+To prepare the dataset by genus, we use the annotations from `diatoms_all.csv`.
+
+### By species
+
+
+
 ## Cleurie/Orne
 
 The categories semantics for the real dataset (Cleurie/Orne) are given in the JSON from the Biigle annotations.
