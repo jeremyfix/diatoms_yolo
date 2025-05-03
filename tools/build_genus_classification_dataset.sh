@@ -82,6 +82,9 @@ while read -r line; do
 
     echo "Processing: $id, $photo, $genus, $species"
 
+    # Remove leading and trailing whitespace from the genus name
+    genus=$(echo "$genus" | xargs)
+
     # Skip the header line
     if [[ "$id" == "Column1" ]]; then
         continue
