@@ -76,6 +76,9 @@ done < "$taxon_to_exclude_csv"
 # While reading the file, we skip the excluded taxa. To decide whether an image must be skipped, we check if the
 # filename column is /diatoms/<Original extraction name>/<Atlas>/<filename>.{jpg,png}
 
+
+tgt_size=512
+
 declare -A genus_names
 while read -r line; do
     IFS=';' read -r id photo genus species _ <<< "$line"
@@ -105,7 +108,21 @@ while read -r line; do
     mkdir -p "$genus_dir"
 
     # Copy the image to the genus directory.
-    cp "$diatoms_dir/$photo" "$genus_dir/"
+    # cp "$diatoms_dir/$photo" "$genus_dir/"
+
+	# Use image magick mogrify to square pad/crop the image to 512x512
+	# The color for padding is the mean color of the image
+	# Get the image size
+	IFS=" x+" read w h x y < <(convert $diatoms_dir/$photo -format "%@" info:)
+
+	# Compute the mean color of the image for padding
+	mean_color=$(convert $diatoms_dir/$photo -colorspace Gray -format "%[fx:mean.r],%[fx:mean.g],%[fx:mean.b]" info:)
+
+	# Cast the mean color as integer in the range 0-255
+	mean_color=$(echo $mean_color | awk -F, '{printf "%d,%d,%d", $1*255, $2*255, $3*255}')
+
+	# Pad the image to $tgt_sizex$tgt_size with the mean color
+	convert -background "rgb($mean_color)" $diatoms_dir/$photo -gravity center -extent "$tgt_size"x"$tgt_size" $genus_dir/$(basename $photo)
 
 done < "$diatoms_all_csv"
 
