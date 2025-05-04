@@ -40,34 +40,11 @@ $ ./tools/build_genus_classification_dataset.sh /opt/Datasets/Diatoms/Atlas/taxo
 
 Then we split the dataset in two folds :
 
+```bash
+$ ./tools/gen_classification_splits.sh /opt/Datasets/Diatoms/GenusDataset
 ```
-cd GenusDataset
 
-# Create the train/val dir layout
-for d in images labels; do for dd in train val; do mkdir -p $d/$dd; done; done
-
-# Optional : unlink previously generated split
-for d in images labels ; do for dd in train val; do $(for f in $d/$dd/*; do unlink $f) | true; done; done; done
-
-# Generate the train/val split (80/20)
-find images/all -type f | shuf > diatom_list
-split -l $[ $(wc -l diatom_list |cut -d" " -f1) * 80 / 100  ] diatom_list fold_
-mv fold_aa fold_train
-mv fold_ab fold_val
-
-# Now we produce the symlinks to the images and annotations for both folds
-for fold in train val; do \
-cd images/$fold ; \
-for f in $(cat ../../fold_$fold); do  ln -s ../../$f ; done ; \
-cd ../../; done 
-
-# Do the same for the labels, we just iterate on the image list
-# and substitute images/labels JPG/txt
-for fold in train val; do \
-cd labels/$fold ; \
-for f in $(cat ../../fold_$fold); do ln -s ../../$(echo $f | sed 's/^images/labels/' | sed 's/JPG$/txt/' ); done
-cd ../../; done 
-```
+Which will create the train/test splits into `/opt/Datasets/Diatoms/GenusDataset/train` and `/opt/Datasets/Diatoms/GenusDataset/test`
 
 and run a training.
 
