@@ -36,6 +36,7 @@ taxon_to_exclude_csv="$1"
 diatoms_all_csv="$2"
 diatoms_dir="$3"
 root_dir="$4"
+mode="species" # species
 
 # Create the root directory if it doesn't exist or remove it if its does. Ask user confirmation if it exists
 if [ -d "$root_dir" ]; then
@@ -88,6 +89,10 @@ while read -r line; do
     # Remove leading and trailing whitespace from the genus name
     genus=$(echo "$genus" | xargs)
 
+	# Remove leading and trailing whitespace from the species name
+	# also replace spaces with underscores
+	species=$(echo "$species" | xargs | tr ' ' '_')
+
     # Skip the header line
     if [[ "$id" == "Column1" ]]; then
         continue
@@ -103,12 +108,15 @@ while read -r line; do
         continue
     fi
 
-    # Create the genus directory if it doesn't exist
-    genus_dir="$root_dir/$genus"
-    mkdir -p "$genus_dir"
+	if [[ "$mode" == "genus" ]]; then
+		target_dir="$root_dir/$genus"
+	elif [[ "$mode" == "species" ]]; then
+		# Create the species directory if it doesn't exist
+		target_dir="$root_dir/$species"
+	fi
 
-    # Copy the image to the genus directory.
-    # cp "$diatoms_dir/$photo" "$genus_dir/"
+	# Create the genus directory if it doesn't exist
+	mkdir -p "$target_dir"
 
 	# Use image magick mogrify to square pad/crop the image to 512x512
 	# The color for padding is the mean color of the image
@@ -122,7 +130,7 @@ while read -r line; do
 	mean_color=$(echo $mean_color | awk -F, '{printf "%d,%d,%d", $1*255, $2*255, $3*255}')
 
 	# Pad the image to $tgt_sizex$tgt_size with the mean color
-	convert -background "rgb($mean_color)" $diatoms_dir/$photo -gravity center -extent "$tgt_size"x"$tgt_size" $genus_dir/$(basename $photo)
+	convert -background "rgb($mean_color)" $diatoms_dir/$photo -gravity center -extent "$tgt_size"x"$tgt_size" $target_dir/$(basename $photo)
 
 done < "$diatoms_all_csv"
 

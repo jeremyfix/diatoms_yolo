@@ -35,7 +35,7 @@ as pad all the images to the same size. The padded color is the average color of
 the image.
 
 ```bash
-$ ./tools/build_genus_classification_dataset.sh /opt/Datasets/Diatoms/Atlas/taxon_to_exclude.csv /opt/Datasets/Diatoms/Atlas/diatoms_all.csv /opt/Datasets/Diatoms/Atlas/ /opt/Datasets/Diatoms/GenusDataset
+$ ./tools/build_classification_dataset.sh /opt/Datasets/Diatoms/Atlas/taxon_to_exclude.csv /opt/Datasets/Diatoms/Atlas/diatoms_all.csv /opt/Datasets/Diatoms/Atlas/ /opt/Datasets/Diatoms/GenusDataset
 ```
 
 Then we split the dataset in two folds :
